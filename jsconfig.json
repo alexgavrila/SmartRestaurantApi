@@ -1,0 +1,11 @@
+{
+	"compilerOptions": {
+		"paths": {
+			"#models/*": ["./models/*"],
+			"#controllers/*": ["./controllers/*"],
+			"#utils/*": ["./utils/*"],
+			"#database": ["./database"]
+		},
+		"baseUrl": "."
+	}
+}
