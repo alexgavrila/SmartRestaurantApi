@@ -7,10 +7,11 @@ import injectRoutes from './utils/injectRoultes';
 import routes from './routes/index';
 import { syncDb } from '#database';
 
-// config stuff
-const PORT = 3001;
-const SECRET = 'bigsecret';
+// create config before anything else
+import { config } from 'dotenv';
+config();
 
+// create app
 const app = express();
 
 // middleware
@@ -27,7 +28,13 @@ app.use(
 );
 
 app.use(express.json());
-app.use(session({ secret: SECRET, resave: true, saveUninitialized: false }));
+app.use(
+	session({
+		secret: process.env.SECRET,
+		resave: true,
+		saveUninitialized: false,
+	})
+);
 
 // authentication middleware
 app.use(passport.initialize());
@@ -52,8 +59,8 @@ app.use(function (err, req, res, next) {
 const startService = async () => {
 	console.log('[INDEX] Starting service');
 	try {
-		await setupServer();
 		await syncDb();
+		await setupServer();
 	} catch (e) {
 		console.log(e);
 		process.exit(1);
@@ -67,8 +74,10 @@ const setupServer = () => {
 		// inject routes
 		injectRoutes(app, routes, '/api');
 
-		app.listen(PORT, () => {
-			console.log(`[INDEX] Server is listening on port ${PORT}`);
+		app.listen(process.env.SERVER_PORT, () => {
+			console.log(
+				`[INDEX] Server is listening on port ${process.env.SERVER_PORT}`
+			);
 			resolve();
 		});
 	});

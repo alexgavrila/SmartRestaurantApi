@@ -1,12 +1,20 @@
 import { Sequelize } from 'sequelize';
 
-const dbOptions = {};
+// create config before anything else
+import { config } from 'dotenv';
+config();
 
-const sequelize = new Sequelize('restaurant', 'newuser', 'password', {
-	host: '172.25.219.165',
-	dialect: 'mysql',
-	logging: false,
-});
+const dbOptions = {};
+const sequelize = new Sequelize(
+	process.env.DB_NAME,
+	process.env.DB_USER,
+	process.env.DB_PASS,
+	{
+		host: process.env.DB_HOST,
+		dialect: 'mysql',
+		logging: false,
+	}
+);
 
 export const syncDb = () => {
 	console.log('[DB] Started database sync');
