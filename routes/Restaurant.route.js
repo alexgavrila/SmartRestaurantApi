@@ -15,9 +15,10 @@ const upload = multer({
 			cb(null, './uploads/restaurant/');
 		},
 		filename: function (req, file, cb) {
-			const uniqueSuffix =
+			const extension = file.originalname.split('.').pop();
+			const uniqueFilename =
 				Date.now() + '-' + Math.round(Math.random() * 1e9);
-			cb(null, file.fieldname + '-' + uniqueSuffix);
+			cb(null, uniqueFilename + '.' + extension);
 		},
 	}),
 });

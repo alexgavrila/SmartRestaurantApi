@@ -57,12 +57,13 @@ export const getRestaurants = async (req, res) => {
 
 export const createRestaurant = async (req, res) => {
 	const { name } = req.body || {};
-
+	const { path: picturePath } = req.file;
 	let response = {};
 	try {
 		response = await Restaurant.create({
 			name: name,
 			ownerId: req.user.id,
+			picture: picturePath,
 		});
 	} catch (e) {
 		const { path, message } = e;
