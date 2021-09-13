@@ -29,7 +29,7 @@ router.use(isAuthenticated);
 
 router.get('/:restaurantId', checkPermission, getRestaurant);
 
-router.get('/', isAuthenticated, getRestaurants);
+router.get('/', getRestaurants);
 
 router.post('/', upload.single('picture'), createRestaurant);
 

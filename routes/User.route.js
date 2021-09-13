@@ -9,11 +9,10 @@ import { isAuthenticated } from '#controllers/Auth.controller';
 
 const router = Router();
 
-router.get('/:userId', isAuthenticated, checkPermission, getUser);
-
 router.get('/', isAuthenticated, (req, res) => {
 	res.send(`First Route Index`);
 });
+router.get('/:userId', isAuthenticated, checkPermission, getUser);
 
 router.post('/', createUser);
 

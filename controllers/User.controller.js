@@ -1,59 +1,24 @@
-import { User } from '#models';
+import { UserService } from '#services';
 
 export const getUser = async (req, res, next) => {
 	const { userId } = req.params || {};
 
-	let response = {};
-
 	try {
-		response = await User.findOne({ where: { _id: userId } });
+		const user = await UserService.getById(userId);
+		res.json(user);
 	} catch (e) {
-		response = e.message;
-		res.status(500);
+		next(e);
 	}
-
-	res.json(response);
 };
 
 export const createUser = async (req, res, next) => {
 	const { email, password } = req.body || {};
-
-	let response = {};
-
 	try {
-		response.data = await User.create({
-			email: email,
-			password: password,
-		});
+		const user = await UserService.create({ email, password });
+		res.json({ user });
 	} catch (e) {
-		response = {
-			errors: e.errors.map(error => {
-				let returnObj = {};
-				const path = error.path.split('.');
-
-				if (path.length == 1) {
-					returnObj = { name: path[0], message: error.message };
-				} else {
-					const name = path.pop();
-					let message = '';
-
-					switch (name) {
-						case 'email':
-							message = 'The email address is already in use';
-							break;
-					}
-
-					returnObj = { name, message };
-				}
-
-				return returnObj;
-			}),
-		};
-
-		res.status(400);
+		next(e);
 	}
-
-	res.json(response);
 };
 
 export const editUser = async (req, res) => {
@@ -79,20 +44,12 @@ export const editUser = async (req, res) => {
 		updateObject[item] = body[item];
 	});
 
-	let response = {};
-
 	try {
-		await User.update(updateObject, {
-			where: { id },
-		});
-
-		response = { message: 'The user has been updated' };
+		const user = await UserService.update(id, updateObject);
+		res.json(user);
 	} catch (e) {
-		response = e.message;
-		res.status(500);
+		next(e);
 	}
-
-	res.json(response);
 };
 
 export const checkPermission = async (req, res, next) => {

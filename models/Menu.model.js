@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import db from '#database';
+import Restaurant from '#models/Restaurant.model';
 
 const { DataTypes, Model } = Sequelize;
 
@@ -17,5 +18,10 @@ Menu.init(
 		sequelize: db,
 	}
 );
+
+Menu.belongsTo(Restaurant, {
+	foreignKey: { allowNull: false },
+	onDelete: 'CASCADE',
+});
 
 export default Menu;

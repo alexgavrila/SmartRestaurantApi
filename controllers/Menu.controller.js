@@ -1,29 +1,29 @@
-import Restaurant from '#models/Restaurant.model';
+import Menu from '#models/Menu.model';
 import { response } from 'express';
 
-export const paramRestaurantId = async (req, res, next) => {
-	const { restaurantId: id } = req.params;
-	let restaurant = null;
+export const paramMenuId = async (req, res, next) => {
+	const { menuId: id } = req.params;
+	let menu = null;
 	try {
-		restaurant = await Restaurant.findOne({
+		menu = await Menu.findOne({
 			where: { id },
 		});
 	} catch (e) {
 		next(e);
 	}
-	req.restaurant = restaurant;
+	req.menu = menu;
 	next();
 };
 
-export const getRestaurant = (req, res) => {
-	const { restaurant } = req;
+export const getMenu = (req, res) => {
+	const { menu } = req;
 
-	const response = { data: restaurant };
+	const response = { data: menu };
 
 	if (!response.data) {
 		response.errors = [
 			{
-				message: 'Restaurant not found!',
+				message: 'Menu not found!',
 			},
 		];
 
@@ -33,16 +33,16 @@ export const getRestaurant = (req, res) => {
 	res.json(response);
 };
 
-export const getRestaurants = async (req, res) => {
-	const { restaurant, user } = req;
+export const getMenus = async (req, res) => {
+	const { menu, user } = req;
 	const where = {};
-	let response = {};
+	const respnse = {};
 	if (!user.isAdmin()) {
-		where.OwnerId = user.id;
+		where.ownerId = user.id;
 	}
 
 	try {
-		response.data = await Restaurant.findAll({
+		response.data = await Menus.findAll({
 			where,
 		});
 	} catch (e) {
@@ -54,15 +54,13 @@ export const getRestaurants = async (req, res) => {
 	res.json(response);
 };
 
-export const createRestaurant = async (req, res) => {
-	const { name } = req.body || {};
-	const { path: picturePath } = req.file || {};
+export const createMenu = async (req, res) => {
+	const { name, restaurantId } = req.body || {};
 	let response = {};
 	try {
-		response = await Restaurant.create({
+		response = await Menu.create({
 			name: name,
-			ownerId: req.user.id,
-			picture: picturePath,
+			RestaurantId: restaurantId,
 		});
 	} catch (e) {
 		const { path, message } = e;
@@ -74,8 +72,8 @@ export const createRestaurant = async (req, res) => {
 };
 
 export const checkPermission = async (req, res, next) => {
-	const { restaurant, user } = req;
-
+	const { menu, user } = req;
+	const restaurant = await menu.getRestaurant();
 	switch (true) {
 		case user.id == restaurant.ownerId:
 		case user.isAdmin():

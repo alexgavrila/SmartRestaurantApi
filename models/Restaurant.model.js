@@ -1,6 +1,6 @@
 import Sequelize from 'sequelize';
 import db from '#database';
-import { User } from '.';
+import User from '#models/User.model';
 
 const { DataTypes, Model } = Sequelize;
 
@@ -24,7 +24,7 @@ Restaurant.init(
 );
 
 Restaurant.belongsTo(User, {
-	foreignKey: { allowNull: false },
+	foreignKey: { allowNull: true },
 	onDelete: 'CASCADE',
 	as: 'owner',
 });

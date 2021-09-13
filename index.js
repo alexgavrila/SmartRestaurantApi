@@ -50,12 +50,6 @@ app.get('/', (req, res) => {
 	res.send('Index');
 });
 
-//error handle
-app.use(function (err, req, res, next) {
-	console.error(err.stack);
-	res.status(500).send({ message: 'Something broke!' });
-});
-
 const startService = async () => {
 	console.log('[INDEX] Starting service');
 	try {
@@ -73,6 +67,12 @@ const setupServer = () => {
 
 		// inject routes
 		injectRoutes(app, routes, '/api');
+
+		//error handle
+		app.use(function (err, req, res, next) {
+			console.error(err);
+			return res.status(400).json({ message: err.message });
+		});
 
 		app.listen(process.env.SERVER_PORT, () => {
 			console.log(
