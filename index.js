@@ -10,7 +10,6 @@ import { syncDb } from '#database';
 // create config before anything else
 import { config } from 'dotenv';
 config();
-
 // create app
 const app = express();
 
@@ -28,13 +27,35 @@ app.use(
 );
 
 app.use(express.json());
-app.use(
-	session({
-		secret: process.env.SECRET,
-		resave: true,
-		saveUninitialized: false,
-	})
-);
+
+// session manager based on ENV
+// will probably change to use a DB Store on PROD
+// filestore for ease on DEV
+if (app.get('env') === 'PROD') {
+	app.use(
+		session({
+			secret: process.env.SECRET,
+			resave: true,
+			saveUninitialized: false,
+		})
+	);
+} else if (app.get('env') === 'DEV') {
+	// import FileStore from 'session-file-store';
+	const FileStore = (await import('session-file-store')).default(session);
+	app.use(
+		session({
+			store: new FileStore({
+				retries: 0,
+			}),
+			secret: process.env.SECRET,
+			resave: true,
+			saveUninitialized: false,
+		})
+	);
+} else {
+	console.log('ENV NOT SET');
+	process.exit(1);
+}
 
 // authentication middleware
 app.use(passport.initialize());
