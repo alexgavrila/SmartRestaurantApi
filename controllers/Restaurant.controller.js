@@ -1,80 +1,93 @@
-import Restaurant from '#models/Restaurant.model';
-import { response } from 'express';
+import { RestaurantService } from '#services';
 
 export const paramRestaurantId = async (req, res, next) => {
-	const { restaurantId: id } = req.params;
-	let restaurant = null;
+	const { restaurantId } = req.params;
 	try {
-		restaurant = await Restaurant.findOne({
-			where: { id },
-		});
+		const restaurant = await RestaurantService.getById(restaurantId);
+
+		req.restaurant = restaurant;
+
+		return next();
 	} catch (e) {
-		next(e);
+		return next(e);
 	}
-	req.restaurant = restaurant;
-	next();
 };
 
 export const getRestaurant = (req, res) => {
-	const { restaurant } = req;
+	const { restaurant } = req || {};
 
-	const response = { data: restaurant };
-
-	if (!response.data) {
-		response.errors = [
-			{
-				message: 'Restaurant not found!',
-			},
-		];
-
-		res.status(404);
-	}
-
-	res.json(response);
+	res.json(restaurant);
 };
 
-export const getRestaurants = async (req, res) => {
-	const { restaurant, user } = req;
+export const getRestaurants = async (req, res, next) => {
+	const { user } = req || {};
+
 	const where = {};
-	let response = {};
+
 	if (!user.isAdmin()) {
 		where.OwnerId = user.id;
 	}
 
 	try {
-		response.data = await Restaurant.findAll({
-			where,
-		});
-	} catch (e) {
-		const { path, message } = e;
-		response = { name: path, message: message };
-		res.status(400);
-	}
+		const restaurants = await RestaurantService.getAll(where);
 
-	res.json(response);
+		return res.json(restaurants);
+	} catch (e) {
+		return next(e);
+	}
 };
 
-export const createRestaurant = async (req, res) => {
+export const createRestaurant = async (req, res, next) => {
 	const { name } = req.body || {};
-	const { path: picturePath } = req.file || {};
-	let response = {};
+	const { path } = req.file || {};
+
 	try {
-		response = await Restaurant.create({
-			name: name,
+		const restaurant = await RestaurantService.create({
+			name,
 			ownerId: req.user.id,
-			picture: picturePath,
+			picture: path,
 		});
+
+		return res.json({ restaurant });
 	} catch (e) {
-		const { path, message } = e;
-		response = { name: path, message: message };
-		res.status(400);
+		return next(e);
+	}
+};
+
+export const editRestaurant = async (req, res) => {
+	const { body } = req || {};
+	const { path } = req.file || {};
+
+	const updateObject = {};
+	const keys = ['name'];
+
+	const { restaurantId } = req.params || {};
+
+	keys.forEach(item => {
+		if (!Object.prototype.hasOwnProperty.call(body, item)) {
+			return;
+		}
+
+		updateObject[item] = body[item];
+	});
+
+	if (path) {
+		updateObject.picture = path;
 	}
 
-	res.send(response);
+	try {
+		const restaurant = await RestaurantService.edit(
+			restaurantId,
+			updateObject
+		);
+		return res.json(restaurant);
+	} catch (e) {
+		return next(e);
+	}
 };
 
 export const checkPermission = async (req, res, next) => {
-	const { restaurant, user } = req;
+	const { restaurant, user } = req || {};
 
 	switch (true) {
 		case user.id == restaurant.ownerId:

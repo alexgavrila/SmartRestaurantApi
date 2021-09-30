@@ -62,6 +62,14 @@ User.init(
 			beforeCreate: async (user, options) => {
 				user.password = await bcrypt.hash(user.password, 10);
 			},
+			beforeBulkUpdate: async (user, options) => {
+				if (user.attributes.hasOwnProperty('password')) {
+					user.attributes.password = await bcrypt.hash(
+						user.attributes.password,
+						10
+					);
+				}
+			},
 			afterCreate: user => {
 				delete user.dataValues.password;
 			},

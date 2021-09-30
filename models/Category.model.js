@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import db from '#database';
+import Menu from './Menu.model';
 
 const { DataTypes, Model } = Sequelize;
 
@@ -17,5 +18,10 @@ Category.init(
 		sequelize: db,
 	}
 );
+
+Category.belongsTo(Menu, {
+	foreignKey: { allowNull: false },
+	onDelete: 'CASCADE',
+});
 
 export default Category;

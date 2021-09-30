@@ -1,79 +1,55 @@
-import Menu from '#models/Menu.model';
-import { response } from 'express';
+import { MenuService } from '#services';
 
 export const paramMenuId = async (req, res, next) => {
-	const { menuId: id } = req.params;
-	let menu = null;
+	const { menuId } = req.params || {};
 	try {
-		menu = await Menu.findOne({
-			where: { id },
-		});
+		const menu = await MenuService.getById(menuId);
+
+		req.menu = menu;
+
+		return next();
 	} catch (e) {
-		next(e);
+		return next(e);
 	}
-	req.menu = menu;
-	next();
 };
 
-export const getMenu = (req, res) => {
-	const { menu } = req;
+export const getMenu = (req, res, next) => {
+	const { menu } = req || {};
 
-	const response = { data: menu };
-
-	if (!response.data) {
-		response.errors = [
-			{
-				message: 'Menu not found!',
-			},
-		];
-
-		res.status(404);
-	}
-
-	res.json(response);
+	res.json(menu);
 };
 
-export const getMenus = async (req, res) => {
-	const { menu, user } = req;
-	const where = {};
-	const respnse = {};
-	if (!user.isAdmin()) {
-		where.ownerId = user.id;
-	}
-
+export const getMenus = async (req, res, next) => {
+	const { restaurantId } = req.params || {};
 	try {
-		response.data = await Menus.findAll({
-			where,
-		});
-	} catch (e) {
-		const { path, message } = e;
-		response = { name: path, message: message };
-		res.status(400);
-	}
-
-	res.json(response);
-};
-
-export const createMenu = async (req, res) => {
-	const { name, restaurantId } = req.body || {};
-	let response = {};
-	try {
-		response = await Menu.create({
-			name: name,
+		const restaurants = await MenuService.getAll({
 			RestaurantId: restaurantId,
 		});
-	} catch (e) {
-		const { path, message } = e;
-		response = { name: path, message: message };
-		res.status(400);
-	}
 
-	res.send(response);
+		return res.json(restaurants);
+	} catch (e) {
+		return next(e);
+	}
+};
+
+export const createMenu = async (req, res, next) => {
+	const { name } = req.body || {};
+	const { restaurantId } = req.params;
+
+	try {
+		const menu = await MenuService.create({
+			name,
+			RestaurantId: restaurantId,
+		});
+
+		return res.json({ menu });
+	} catch (e) {
+		return next(e);
+	}
 };
 
 export const checkPermission = async (req, res, next) => {
-	const { menu, user } = req;
-	const restaurant = await menu.getRestaurant();
+	const { menu, user, restaurant } = req || {};
 	switch (true) {
 		case user.id == restaurant.ownerId:
 		case user.isAdmin():

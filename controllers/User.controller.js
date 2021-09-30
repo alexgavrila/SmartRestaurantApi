@@ -5,9 +5,9 @@ export const getUser = async (req, res, next) => {
 
 	try {
 		const user = await UserService.getById(userId);
-		res.json(user);
+		return res.json(user);
 	} catch (e) {
-		next(e);
+		return next(e);
 	}
 };
 
@@ -15,17 +15,17 @@ export const createUser = async (req, res, next) => {
 	const { email, password } = req.body || {};
 	try {
 		const user = await UserService.create({ email, password });
-		res.json({ user });
+		return res.json({ user });
 	} catch (e) {
-		next(e);
+		return next(e);
 	}
 };
 
-export const editUser = async (req, res) => {
+export const editUser = async (req, res, next) => {
 	const body = req.body;
 
 	const updateObject = {};
-	const keys = ['email', 'displayName'];
+	const keys = ['email', 'displayName', 'password'];
 
 	const { userId } = req.params;
 
@@ -45,10 +45,10 @@ export const editUser = async (req, res) => {
 	});
 
 	try {
-		const user = await UserService.update(id, updateObject);
-		res.json(user);
+		const user = await UserService.edit(id, updateObject);
+		return res.json(user);
 	} catch (e) {
-		next(e);
+		return next(e);
 	}
 };
 

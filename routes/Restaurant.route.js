@@ -5,9 +5,12 @@ import {
 	getRestaurants,
 	checkPermission,
 	paramRestaurantId,
+	editRestaurant,
 } from '#controllers/Restaurant.controller';
 import { Router } from 'express';
 import multer from 'multer';
+
+import MenuRoute from './Menu.route';
 
 const upload = multer({
 	storage: multer.diskStorage({
@@ -23,7 +26,7 @@ const upload = multer({
 	}),
 });
 
-const router = Router();
+const router = Router({ mergeParams: true });
 
 router.use(isAuthenticated);
 
@@ -33,9 +36,19 @@ router.get('/', getRestaurants);
 
 router.post('/', upload.single('picture'), createRestaurant);
 
+router.put(
+	'/:restaurantId',
+	checkPermission,
+	upload.single('picture'),
+	editRestaurant
+);
+
 router.param('restaurantId', paramRestaurantId);
 
+// nested route
+router.use(MenuRoute.namespace, MenuRoute.router);
+
 export default {
-	namespace: '/restaurant',
+	namespace: '/restaurants',
 	router: router,
 };
