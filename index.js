@@ -3,8 +3,8 @@ import session from 'express-session';
 import cors from 'cors';
 import passport from 'passport';
 
-import injectRoutes from './utils/injectRoultes';
-import routes from './routes/index';
+import injectRoutes from '#utils/injectRoutes';
+import routes from '#routes/index';
 import { syncDb } from '#database';
 
 // create config before anything else

@@ -1,5 +1,6 @@
 import Sequelize from 'sequelize';
 import db from '#database';
+import Category from './Category.model';
 
 const { DataTypes, Model } = Sequelize;
 
@@ -26,5 +27,10 @@ Item.init(
 		sequelize: db,
 	}
 );
+
+Item.belongsTo(Category, {
+	foreignKey: { allowNull: false },
+	onDelete: 'CASCADE',
+});
 
 export default Item;

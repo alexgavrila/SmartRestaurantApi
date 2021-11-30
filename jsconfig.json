@@ -3,7 +3,7 @@
 		"paths": {
 			"#models/*": ["./models/*"],
 			"#controllers/*": ["./controllers/*"],
-			"#utils": ["./utils"],
+			"#utils": ["utils"],
 			"#database": ["./database"],
 			"#services": ["./services"]
 		},
